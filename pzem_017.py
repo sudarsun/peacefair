@@ -93,6 +93,8 @@ class PZEM017:
         """ get the device address """
         return self._device.read_register(2)
 
+    # @TODO: Upon changing the address, the object should automatically
+    # renew to the new address.
     @address.setter
     def address(self, new_address):
         """ change the device's MODBUS address """
