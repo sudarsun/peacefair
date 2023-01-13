@@ -13,6 +13,7 @@ class PZEM017:
     """ wrapper to access PZEM-017 device as a MODBUS slave """
     def __init__(self, device, identifier, address=1, baudrate=9600, timeout=5, stopbits=2):
         self._device = minimalmodbus.Instrument(device, address, mode=minimalmodbus.MODE_RTU, close_port_after_each_call=True)
+        self._device_path = device
         self._device.serial.baudrate = baudrate
         self._device.serial.timeout = timeout
         self._device.serial.stopbits = stopbits
@@ -93,12 +94,17 @@ class PZEM017:
         """ get the device address """
         return self._device.read_register(2)
 
-    # @TODO: Upon changing the address, the object should automatically
-    # renew to the new address.
     @address.setter
     def address(self, new_address):
         """ change the device's MODBUS address """
         self._device.write_register(2, new_address, functioncode=6)
+        # now reinitialize the object to continue talking to the device
+        # in the new address.
+        self.__init__(self._device_path, self._id,
+                      address=self._device.address,
+                      baudrate=self._device.serial.baudrate,
+                      timeout=self._device.serial.timeout,
+                      stopbits=self._device.serial.stopbits)
 
     @property
     def low_voltage_alarm(self):
